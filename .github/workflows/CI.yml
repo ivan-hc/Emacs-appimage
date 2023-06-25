@@ -18,9 +18,9 @@ jobs:
       run: |
         sudo apt update
         sudo apt install libfuse2
-        wget https://raw.githubusercontent.com/ivan-hc/Emacs-appimage/main/emacs-builder.sh
-        chmod a+x ./emacs-builder.sh
-        ./emacs-builder.sh
+        wget https://raw.githubusercontent.com/ivan-hc/Emacs-appimage/main/emacs-builder
+        chmod a+x ./emacs-builder
+        ./emacs-builder
         mkdir dist
         mv *AppImage dist/
     - name: Upload artifact
