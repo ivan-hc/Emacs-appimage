@@ -99,4 +99,4 @@ mv ./$APP/$APP$underscore*.deb ./version/
 version=$(ls ./version | cut -c 12- | rev | cut -c 11- | rev)
 
 cd ..
-mv ./tmp/*.AppImage ./Emacs-$version.AppImage
+mv ./tmp/*.AppImage ./Emacs-$VERSION.AppImage
