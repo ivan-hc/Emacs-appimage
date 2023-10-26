@@ -1,9 +1,19 @@
-# Emacs-appimage
-Unofficial AppImage for the latest Emacs version.
+This repository provides Unofficial AppImages of Emacs built on top of [JuNest](https://github.com/fsquillace/junest) and the scripts to built them.
 
-This is built using the official PPA for the previous (not the latest, not the older) Ubuntu LTS.
+You can download the last continuous version from [here](https://github.com/ivan-hc/Emacs-appimage/releases/tag/continuous).
+
+The old Emacs-28_28.1.1 (ir the last version available from Ubuntu's PPA, being it no more updated) is available [here](https://github.com/ivan-hc/Emacs-appimage/releases/tag/28.1.1).
 
 ###### NOTE: *This repository is inspired by [github.com/probonopd/Emacs.AppImage](https://github.com/probonopd/Emacs.AppImage) and created to make sure that "AM" and AppMan users don't get left behind!*
+
+-------------------------
+### Reduce the size of the JuNest based Appimage
+You can analyze the presence of excess files inside the AppImage by extracting it:
+
+    ./*.AppImage --appimage-extract
+To start your tests, run the "AppRun" script inside the "squashfs-root" folder extracted from the AppImage:
+
+    ./squashfs-root/AppRun
 
 ---------------------------------
 
