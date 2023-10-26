@@ -2,7 +2,7 @@ This repository provides Unofficial AppImages of Emacs built on top of [JuNest](
 
 You can download the last continuous version from [here](https://github.com/ivan-hc/Emacs-appimage/releases/tag/continuous).
 
-The old Emacs-28_28.1.1 (ir the last version available from Ubuntu's PPA, being it no more updated) is available [here](https://github.com/ivan-hc/Emacs-appimage/releases/tag/28.1.1).
+Previously, this Appimage was based on the official PPA, but given the gradual abandonment of .deb packages in favor of Snaps, the latest version available is 28_28.1.1. You can download it from [here](https://github.com/ivan-hc/Emacs-appimage/releases/tag/28.1.1) if you have any problems with JuNest based versions, with "AM" and AppMan (keep reading) you can also downgrade via the `--rollback` option.
 
 ###### NOTE: *This repository is inspired by [github.com/probonopd/Emacs.AppImage](https://github.com/probonopd/Emacs.AppImage) and created to make sure that "AM" and AppMan users don't get left behind!*
 
