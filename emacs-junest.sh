@@ -3,7 +3,7 @@
 # NAME OF THE APP BY REPLACING "SAMPLE"
 APP=emacs
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
-DEPENDENCES="emacs-apel emacs-muse emacs-php-mode emacs-python-mode emacs-slime"
+DEPENDENCES="ecb emacs-apel emacs-muse emacs-php-mode emacs-python-mode emacs-slime flim semi wanderlust"
 #BASICSTUFF="binutils gzip"
 #COMPILERS="gcc"
 
