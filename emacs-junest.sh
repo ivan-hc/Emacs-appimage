@@ -104,129 +104,132 @@ find ./$APP.AppDir/.junest/usr/share/doc/* -not -iname "*$BIN*" -a -not -name ".
 find ./$APP.AppDir/.junest/usr/share/locale/*/*/* -not -iname "*$BIN*" -a -not -name "." -delete #REMOVE ALL ADDITIONAL LOCALE FILES
 rm -R -f ./$APP.AppDir/.junest/etc/makepkg.conf
 rm -R -f ./$APP.AppDir/.junest/etc/pacman.conf
-rm -R -f ./$APP.AppDir/.junest/usr/include
+rm -R -f ./$APP.AppDir/.junest/usr/include #FILES RELATED TO THE COMPILER
+rm -R -f ./$APP.AppDir/.junest/usr/man #APPIMAGES ARE NOT MENT TO HAVE MAN COMMAND
 rm -R -f ./$APP.AppDir/.junest/var/* #REMOVE ALL PACKAGES DOWNLOADED WITH THE PACKAGE MANAGER
 
-# ADDITIONAL REMOVALS
+# IN THE NEXT 4 STEPS WE WILL TRY TO LIGHTEN THE FINAL APPIMAGE PACKAGE
+# WE WILL MOVE EXCESS CONTENT TO BACKUP FOLDERS (STEP 1)
+# THE AFFECTED DIRECTORIES WILL BE /usr/bin (STEP 2), /usr/lib (STEP 3) AND /usr/share (STEP 4)
+
+# STEP 1, CREATE A BACKUP FOLDER WHERE TO SAVE THE FILES TO BE DISCARDED (USEFUL FOR TESTING PURPOSES)
+mkdir -p ./junest-backups/usr/bin
+mkdir -p ./junest-backups/usr/lib/dri
+mkdir -p ./junest-backups/usr/share
+
+# STEP 2, FUNCTION TO SAVE THE BINARIES IN /usr/bin THAT ARE NEEDED TO MADE JUNEST WORK, PLUS THE MAIN BINARY/BINARIES OF THE APP
+# IF YOU NEED TO SAVE MORE BINARIES, LIST THEM IN THE "BINSAVED" VARIABLE. COMMENT THE LINE "_savebins" IF YOU ARE NOT SURE.
+_savebins(){
+	BINSAVED="SAVEBINSPLEASE"
+	mkdir save
+	mv ./$APP.AppDir/.junest/usr/bin/*$BIN* ./save/
+	mv ./$APP.AppDir/.junest/usr/bin/bash ./save/
+	mv ./$APP.AppDir/.junest/usr/bin/env ./save/
+	mv ./$APP.AppDir/.junest/usr/bin/proot* ./save/
+	mv ./$APP.AppDir/.junest/usr/bin/sh ./save/
+	for arg in $BINSAVED; do
+		for var in $arg; do
+ 			mv ./$APP.AppDir/.junest/usr/bin/*"$arg"* ./save/
+		done
+	done
+	mv ./$APP.AppDir/.junest/usr/bin/* ./junest-backups/usr/bin/
+	mv ./save/* ./$APP.AppDir/.junest/usr/bin/
+	rmdir save
+}
+_savebins
+
+# STEP 3, MOVE UNNECESSARY LIBRARIES TO A BACKUP FOLDER (FOR TESTING PURPOSES)
 mkdir save
 
-cp -r ./$APP.AppDir/.junest/usr/bin/emacs* ./save/
-cp -r ./$APP.AppDir/.junest/usr/bin/bash ./save/
-cp -r ./$APP.AppDir/.junest/usr/bin/env ./save/
-cp -r ./$APP.AppDir/.junest/usr/bin/proot* ./save/
-cp -r ./$APP.AppDir/.junest/usr/bin/sh ./save/
-rm -R -f ./$APP.AppDir/.junest/usr/bin/*
-mv ./save/* ./$APP.AppDir/.junest/usr/bin/
+_binlibs(){
+	readelf -d ./$APP.AppDir/.junest/usr/bin/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	mv ./$APP.AppDir/.junest/usr/lib/ld-linux-x86-64.so* ./save/
+	mv ./$APP.AppDir/.junest/usr/lib/*$APP* ./save/
+	mv ./$APP.AppDir/.junest/usr/lib/*$BIN* ./save/
+	mv ./$APP.AppDir/.junest/usr/lib/libdw* ./save/
+	mv ./$APP.AppDir/.junest/usr/lib/libelf* ./save/
+	SHARESAVED="SAVESHAREPLEASE"
+	for arg in $SHARESAVED; do
+		for var in $arg; do
+ 			mv ./$APP.AppDir/.junest/usr/lib/*"$arg"* ./save/
+		done
+	done
+	ARGS=$(tail -n +2 ./list | sort -u | uniq)
+	for arg in $ARGS; do
+		for var in $arg; do
+			mv ./$APP.AppDir/.junest/usr/lib/$arg* ./save/
+			cp --parent ./$APP.AppDir/.junest/usr/lib/*/$arg* ./save/
+			cp --parent ./$APP.AppDir/.junest/usr/lib/*/*/$arg* ./save/
+			cp --parent ./$APP.AppDir/.junest/usr/lib/*/*/*/$arg* ./save/
+			mv $(find ./save/ | sort | grep "usr/lib" | head -1)/* ./save/
+			rm -R -f $(find ./save/ | sort | grep ".AppDir" | head -1)
+		done 
+	done
+	
+	rm list
+}
 
-rm -R -f ./$APP.AppDir/.junest/usr/lib/*.a
-rm -R -f ./$APP.AppDir/.junest/usr/lib/*.o
-cp -r ./$APP.AppDir/.junest/usr/lib/ld-linux-x86-64.so.* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libacl.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libasound.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libatk-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libatspi.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libblkid* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libbrotlicommon.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libbrotli* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libbz2.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libcairo* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libcap* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libcloudproviders.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libcrypt* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libc.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libdatrie.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libdbus-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libepoxy.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libexpat.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libffi.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libfontconfig.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libfreetype.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libfribidi.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgcc_s.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgcrypt.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgdk-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgdk_pixbuf-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgif.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgio-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libglib-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgmodule-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgmp.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgmpxx.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgnutls* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgobject-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgpg-error.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgpgme* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgpm.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgraphite* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libgtk-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libharfbuzz* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libhogweed.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libICE.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libicu* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libidn* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libjansson.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libjbig* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libjpeg.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libjson-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/liblcms* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/liblz* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libm* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libncursesw.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libnettle.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libotf.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libp11-kit.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libpango* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libpcre* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libpixman-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libpng* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libreadline.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/librsvg-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libsharpyuv.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libSM.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libsqlite* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libstdc++.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libsystemd.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libtasn* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libthai.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libtiff.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libtracker-sparql-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libtree-sitter.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libunistring.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libuuid.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libwayland-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libwebp* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libX11* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libXau.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libxcb* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libXcomposite.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libXcursor.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libXdamage.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libXdmcp.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libXext.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libXfixes.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libXinerama.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libXi.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libxkbcommon.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libxkbregistry.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libxml* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libXrandr.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libXrender.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libz.so* ./save/
-cp -r ./$APP.AppDir/.junest/usr/lib/libzstd.so* ./save/
-rm -R -f ./$APP.AppDir/.junest/usr/lib/*
+_liblibs(){
+	readelf -d ./save/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	readelf -d ./save/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	readelf -d ./save/*/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	readelf -d ./save/*/*/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	ARGS=$(tail -n +2 ./list | sort -u | uniq)
+	for arg in $ARGS; do
+		for var in $arg; do
+			mv ./$APP.AppDir/.junest/usr/lib/$arg* ./save/
+			cp --parent ./$APP.AppDir/.junest/usr/lib/*/$arg* ./save/
+			cp --parent ./$APP.AppDir/.junest/usr/lib/*/*/$arg* ./save/
+			cp --parent ./$APP.AppDir/.junest/usr/lib/*/*/*/$arg* ./save/
+			mv $(find ./save/ | sort | grep "usr/lib" | head -1)/* ./save/
+			rm -R -f $(find ./save/ | sort | grep ".AppDir" | head -1)
+		done 
+	done
+	rm list
+}
+
+_mvlibs(){
+mv ./$APP.AppDir/.junest/usr/lib/* ./junest-backups/usr/lib/
 mv ./save/* ./$APP.AppDir/.junest/usr/lib/
+}
 
-cp -r ./$APP.AppDir/.junest/usr/share/emacs ./save/
-cp -r ./$APP.AppDir/.junest/usr/share/fontconfig ./save/
-cp -r ./$APP.AppDir/.junest/usr/share/glib-* ./save/
-cp -r ./$APP.AppDir/.junest/usr/share/locale ./save/
-cp -r ./$APP.AppDir/.junest/usr/share/mime ./save/
-cp -r ./$APP.AppDir/.junest/usr/share/wayland ./save/
-cp -r ./$APP.AppDir/.junest/usr/share/X11 ./save/
-rm -R -f ./$APP.AppDir/.junest/usr/share/*
-mv ./save/* ./$APP.AppDir/.junest/usr/share/
+_binlibs
+
+_liblibs
+_liblibs
+_liblibs
+_liblibs
+_liblibs
+
+_mvlibs
 
 rmdir save
+
+# STEP 4, SAVE ONLY SOME DIRECTORIES CONTAINED IN /usr/share
+# IF YOU NEED TO SAVE MORE FOLDERS, LIST THEM IN THE "SHARESAVED" VARIABLE. COMMENT THE LINE "_saveshare" IF YOU ARE NOT SURE.
+_saveshare(){
+	SHARESAVED="SAVESHAREPLEASE"
+	mkdir save
+	mv ./$APP.AppDir/.junest/usr/share/*$APP* ./save/
+ 	mv ./$APP.AppDir/.junest/usr/share/*$BIN* ./save/
+	mv ./$APP.AppDir/.junest/usr/share/fontconfig ./save/
+	mv ./$APP.AppDir/.junest/usr/share/glib-* ./save/
+	mv ./$APP.AppDir/.junest/usr/share/locale ./save/
+	mv ./$APP.AppDir/.junest/usr/share/mime ./save/
+	mv ./$APP.AppDir/.junest/usr/share/wayland ./save/
+	mv ./$APP.AppDir/.junest/usr/share/X11 ./save/
+	for arg in $SHARESAVED; do
+		for var in $arg; do
+ 			mv ./$APP.AppDir/.junest/usr/share/*"$arg"* ./save/
+		done
+	done
+	mv ./$APP.AppDir/.junest/usr/share/* ./junest-backups/usr/share/
+	mv ./save/* ./$APP.AppDir/.junest/usr/share/
+	rmdir save
+}
+_saveshare
+
+# ADDITIONAL REMOVALS
 
 # REMOVE THE INBUILT HOME
 rm -R -f ./$APP.AppDir/.junest/home
@@ -237,4 +240,4 @@ mkdir -p ./$APP.AppDir/.junest/media
 
 # CREATE THE APPIMAGE
 ARCH=x86_64 ./appimagetool -n ./$APP.AppDir
-mv ./*AppImage ./"$(cat ./$APP.AppDir/*.desktop | grep 'Name=' | head -1 | cut -c 6- | sed 's/ /-/g')"_"$VERSION""$VERSIONAUR"-ivanhcreview20231123-2-x86_64.AppImage
+mv ./*AppImage ./"$(cat ./$APP.AppDir/*.desktop | grep 'Name=' | head -1 | cut -c 6- | sed 's/ /-/g')"_"$VERSION""$VERSIONAUR"-archimage2.0-x86_64.AppImage
