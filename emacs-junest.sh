@@ -103,6 +103,17 @@ sed -i 's/ln/#ln/g' ./.local/share/junest/lib/core/wrappers.sh
 # EXIT THE APPDIR
 cd ..
 
+# EXTRACT PACKAGE CONTENT
+mkdir base
+tar fx $APP.AppDir/.junest/var/cache/pacman/pkg/$APP*.zst -C ./base/
+
+mkdir deps
+for arg in $DEPENDENCES; do
+	for var in $arg; do
+ 		tar fx $APP.AppDir/.junest/var/cache/pacman/pkg/$arg*.zst -C ./deps/
+	done
+done
+
 # REMOVE SOME BLOATWARES
 find ./$APP.AppDir/.junest/usr/share/doc/* -not -iname "*$BIN*" -a -not -name "." -delete #REMOVE ALL DOCUMENTATION NOT RELATED TO THE APP
 find ./$APP.AppDir/.junest/usr/share/locale/*/*/* -not -iname "*$BIN*" -a -not -name "." -delete #REMOVE ALL ADDITIONAL LOCALE FILES
@@ -138,6 +149,7 @@ _savebins(){
 	done
 	mv ./$APP.AppDir/.junest/usr/bin/* ./junest-backups/usr/bin/
 	mv ./save/* ./$APP.AppDir/.junest/usr/bin/
+ 	mv ./base/usr/bin/* ./$APP.AppDir/.junest/usr/bin/
 	rmdir save
 }
 _savebins
@@ -152,7 +164,7 @@ _binlibs(){
 	mv ./$APP.AppDir/.junest/usr/lib/*$BIN* ./save/
 	mv ./$APP.AppDir/.junest/usr/lib/libdw* ./save/
 	mv ./$APP.AppDir/.junest/usr/lib/libelf* ./save/
-	SHARESAVED="SAVESHAREPLEASE"
+	SHARESAVED="SAVESHAREPLEASE" # Enter here keywords or file/folder names to save in /usr/lib. By default, the names of the folders that you will save in /usr/share are selected also here.
 	for arg in $SHARESAVED; do
 		for var in $arg; do
  			mv ./$APP.AppDir/.junest/usr/lib/*"$arg"* ./save/
@@ -162,15 +174,25 @@ _binlibs(){
 	for arg in $ARGS; do
 		for var in $arg; do
 			mv ./$APP.AppDir/.junest/usr/lib/$arg* ./save/
-			cp --parent ./$APP.AppDir/.junest/usr/lib/*/$arg* ./save/
-			cp --parent ./$APP.AppDir/.junest/usr/lib/*/*/$arg* ./save/
-			cp --parent ./$APP.AppDir/.junest/usr/lib/*/*/*/$arg* ./save/
-			mv $(find ./save/ | sort | grep "usr/lib" | head -1)/* ./save/
-			rm -R -f $(find ./save/ | sort | grep ".AppDir" | head -1)
+			find ./$APP.AppDir/.junest/usr/lib/ -name $arg -exec cp -r --parents -t save/ {} +
 		done 
 	done
-	
+	rm -R -f $(find ./save/ | sort | grep ".AppDir" | head -1)
 	rm list
+}
+
+_include_swrast_dri(){
+	mkdir ./save/dri
+	mv ./$APP.AppDir/.junest/usr/lib/dri/swrast_dri.so ./save/dri/
+}
+
+_libkeywords(){
+	LIBSAVED="SAVELIBSPLEASE" # Enter here keywords or file/folder names to save in /usr/lib.
+	for arg in $LIBSAVED; do
+		for var in $arg; do
+ 			mv ./$APP.AppDir/.junest/usr/lib/*"$arg"* ./save/
+		done
+	done
 }
 
 _liblibs(){
@@ -178,26 +200,40 @@ _liblibs(){
 	readelf -d ./save/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
 	readelf -d ./save/*/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
 	readelf -d ./save/*/*/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	readelf -d ./save/*/*/*/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+ 	readelf -d ./base/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	readelf -d ./base/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	readelf -d ./base/*/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	readelf -d ./base/*/*/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	readelf -d ./base/*/*/*/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+  	readelf -d ./deps/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	readelf -d ./deps/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	readelf -d ./deps/*/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	readelf -d ./deps/*/*/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
+	readelf -d ./deps/*/*/*/*/* | grep .so | sed 's:.* ::' | cut -c 2- | sed 's/\(^.*so\).*$/\1/' | uniq >> ./list
 	ARGS=$(tail -n +2 ./list | sort -u | uniq)
 	for arg in $ARGS; do
 		for var in $arg; do
 			mv ./$APP.AppDir/.junest/usr/lib/$arg* ./save/
-			cp --parent ./$APP.AppDir/.junest/usr/lib/*/$arg* ./save/
-			cp --parent ./$APP.AppDir/.junest/usr/lib/*/*/$arg* ./save/
-			cp --parent ./$APP.AppDir/.junest/usr/lib/*/*/*/$arg* ./save/
-			mv $(find ./save/ | sort | grep "usr/lib" | head -1)/* ./save/
-			rm -R -f $(find ./save/ | sort | grep ".AppDir" | head -1)
+			find ./$APP.AppDir/.junest/usr/lib/ -name $arg -exec cp -r --parents -t save/ {} +
 		done 
 	done
+	rsync -av ./save/$APP.AppDir/.junest/usr/lib/* ./save/
+ 	rm -R -f $(find ./save/ | sort | grep ".AppDir" | head -1)
 	rm list
 }
 
 _mvlibs(){
-mv ./$APP.AppDir/.junest/usr/lib/* ./junest-backups/usr/lib/
-mv ./save/* ./$APP.AppDir/.junest/usr/lib/
+	mv ./$APP.AppDir/.junest/usr/lib/* ./junest-backups/usr/lib/
+	mv ./save/* ./$APP.AppDir/.junest/usr/lib/
+ 	mv ./base/usr/lib/* ./$APP.AppDir/.junest/usr/lib/
 }
 
 _binlibs
+
+#_include_swrast_dri
+
+#_libkeywords
 
 _liblibs
 _liblibs
@@ -229,6 +265,7 @@ _saveshare(){
 	done
 	mv ./$APP.AppDir/.junest/usr/share/* ./junest-backups/usr/share/
 	mv ./save/* ./$APP.AppDir/.junest/usr/share/
+ 	mv ./base/usr/share/* ./$APP.AppDir/.junest/usr/share/
 	rmdir save
 }
 _saveshare
@@ -244,4 +281,4 @@ mkdir -p ./$APP.AppDir/.junest/media
 
 # CREATE THE APPIMAGE
 ARCH=x86_64 ./appimagetool -n ./$APP.AppDir
-mv ./*AppImage ./"$(cat ./$APP.AppDir/*.desktop | grep 'Name=' | head -1 | cut -c 6- | sed 's/ /-/g')"_"$VERSION""$VERSIONAUR"-archimage2.0-x86_64.AppImage
+mv ./*AppImage ./"$(cat ./$APP.AppDir/*.desktop | grep 'Name=' | head -1 | cut -c 6- | sed 's/ /-/g')"_"$VERSION""$VERSIONAUR"-archimage2.1-2-x86_64.AppImage
