@@ -86,7 +86,6 @@ export JUNEST_HOME=$HERE/.junest
 export PATH=$HERE/.local/share/junest/bin/:$PATH
 mkdir -p $HOME/.cache
 EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2- | sed -e 's|%.||g')
-VER=$(ls $JUNEST_HOME/usr/bin/ | grep emacs | sort | head -3 | tail -1 | cut -c 6-)
 export EMACSPATH=${JUNEST_HOME}/usr/share/emacs/$(ls ${JUNEST_HOME}/usr/share/emacs/ | sort | head -1)/
 export EMACSDATA=$EMACSPATH/etc
 export EMACSDOC=$EMACSPATH/etc
@@ -271,6 +270,8 @@ _saveshare(){
 _saveshare
 
 # ADDITIONAL REMOVALS
+mv ./$APP.AppDir/.junest/usr/lib/libLLVM-* ./junest-backups/usr/lib/ #INCLUDED IN THE COMPILATION PHASE, CAN SOMETIMES BE EXCLUDED FOR DAILY USE
+rm -R -f ./$APP.AppDir/.junest/usr/lib/python*/__pycache__/* #IF PYTHON IS INSTALLED, REMOVING THIS DIRECTORY CAN SAVE SEVERAL MEGABYTES
 
 # REMOVE THE INBUILT HOME
 rm -R -f ./$APP.AppDir/.junest/home
@@ -281,4 +282,4 @@ mkdir -p ./$APP.AppDir/.junest/media
 
 # CREATE THE APPIMAGE
 ARCH=x86_64 ./appimagetool -n ./$APP.AppDir
-mv ./*AppImage ./"$(cat ./$APP.AppDir/*.desktop | grep 'Name=' | head -1 | cut -c 6- | sed 's/ /-/g')"_"$VERSION""$VERSIONAUR"-archimage2.1-2-x86_64.AppImage
+mv ./*AppImage ./"$(cat ./$APP.AppDir/*.desktop | grep 'Name=' | head -1 | cut -c 6- | sed 's/ /-/g')"_"$VERSION""$VERSIONAUR"-archimage2.1-3-x86_64.AppImage
