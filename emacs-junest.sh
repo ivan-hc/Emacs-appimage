@@ -7,9 +7,6 @@ DEPENDENCES="ca-certificates ecb emacs-apel emacs-muse emacs-php-mode emacs-pyth
 #BASICSTUFF="binutils gzip"
 #COMPILERS="base-devel"
 
-# ADD A VERSION, THIS IS NEEDED FOR THE NAME OF THE FINEL APPIMAGE, IF NOT AVAILABLE ON THE REPO, THE VALUE COME FROM AUR, AND VICE VERSA
-VERSION=$(wget -q https://archlinux.org/packages/extra/x86_64/$APP/ -O - | grep $APP | grep details | head -1 | grep -o -P '(?<=">).*(?=</)' | grep -o '^\S*')
-
 # CREATE THE APPDIR (DON'T TOUCH THIS)...
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
 chmod a+x appimagetool
@@ -105,7 +102,7 @@ cd ..
 # EXTRACT PACKAGE CONTENT
 mkdir base
 tar fx $(find ./$APP.AppDir -name $APP-[0-9]*zst | head -1) -C ./base/
-
+VERSION=$(cat ./base/.PKGINFO | grep pkgver | cut -c 10-)
 mkdir deps
 
 ARGS=$(echo "$DEPENDENCES" | tr " " "\n")
