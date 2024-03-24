@@ -3,7 +3,7 @@
 # NAME OF THE APP BY REPLACING "SAMPLE"
 APP=emacs
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
-DEPENDENCES="ca-certificates ecb emacs-apel emacs-muse emacs-php-mode emacs-python-mode emacs-slime flim semi wanderlust"
+DEPENDENCES="ca-certificates libselinux ecb emacs-apel emacs-muse emacs-php-mode emacs-python-mode emacs-slime flim semi wanderlust"
 #BASICSTUFF="binutils debugedit gzip"
 #COMPILERS="base-devel"
 
@@ -123,7 +123,10 @@ if test -f $JUNEST_HOME/usr/lib/libselinux.so; then
 fi
 
 EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2- | sed -e 's|%.||g')
-$HERE/.local/share/junest/bin/junest -n -b "$BINDS" -- $EXEC "$@"
+case "$1" in
+	'') $HERE/.local/share/junest/bin/junest -n -b "$BINDS" -- $EXEC "$@";;
+	*) $HERE/.local/share/junest/bin/junest -n -b "$BINDS" -- emacsclient "$@";;
+esac
 EOF
 chmod a+x ./AppRun
 
@@ -190,7 +193,7 @@ rm -R -f ./$APP.AppDir/.junest/var/* #REMOVE ALL PACKAGES DOWNLOADED WITH THE PA
 # SAVE FILES USING KEYWORDS
 BINSAVED="certificates SAVEBINSPLEASE" # Enter here keywords to find and save in /usr/bin
 SHARESAVED="certificates SAVESHAREPLEASE" # Enter here keywords or file/folder names to save in both /usr/share and /usr/lib
-LIBSAVED="pk p11 alsa jack pipewire pulse emacs" # Enter here keywords or file/folder names to save in /usr/lib
+LIBSAVED="pk p11 alsa jack pipewire pulse SAVELIBSPLEASE" # Enter here keywords or file/folder names to save in /usr/lib
 
 # STEP 2, FUNCTION TO SAVE THE BINARIES IN /usr/bin THAT ARE NEEDED TO MADE JUNEST WORK, PLUS THE MAIN BINARY/BINARIES OF THE APP
 # IF YOU NEED TO SAVE MORE BINARIES, LIST THEM IN THE "BINSAVED" VARIABLE. COMMENT THE LINE "_savebins" IF YOU ARE NOT SURE.
@@ -319,7 +322,7 @@ rsync -av ./base/* ./$APP.AppDir/.junest/
 
 # RSYNC DEPENDENCES
 rm -R -f ./deps/.*
-#rsync -av ./deps/* ./$APP.AppDir/.junest/
+rsync -av ./deps/* ./$APP.AppDir/.junest/
 
 # ADDITIONAL REMOVALS
 #rm -R -f ./$APP.AppDir/.junest/usr/lib/libLLVM-* #INCLUDED IN THE COMPILATION PHASE, CAN SOMETIMES BE EXCLUDED FOR DAILY USE
@@ -341,4 +344,4 @@ if test -f ./*.AppImage; then
 	rm -R -f ./*archimage*.AppImage
 fi
 ARCH=x86_64 VERSION=$(./appimagetool -v | grep -o '[[:digit:]]*') ./appimagetool -s ./$APP.AppDir
-mv ./*AppImage ./"$(cat ./$APP.AppDir/*.desktop | grep 'Name=' | head -1 | cut -c 6- | sed 's/ /-/g')"_"$VERSION"-archimage3.4-x86_64.AppImage
+mv ./*AppImage ./"$(cat ./$APP.AppDir/*.desktop | grep 'Name=' | head -1 | cut -c 6- | sed 's/ /-/g')"_"$VERSION"-1-archimage3.4-x86_64.AppImage
