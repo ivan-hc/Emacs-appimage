@@ -1,0 +1,1 @@
+https://github.com/ivan-hc/Emacs-appimage/releases/download/continuous/Emacs_30.1-3-archimage4.3-x86_64.AppImage
