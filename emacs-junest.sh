@@ -272,8 +272,8 @@ _JUNEST_CMD() {
 EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2- | sed -e 's|%.||g')
 
 case "$1" in
-	'') _JUNEST_CMD -- $EXEC "$@";;
-	*) _JUNEST_CMD -- emacsclient "$@";;
+	'') _JUNEST_CMD -- /usr/bin/$EXEC "$@";;
+	*) _JUNEST_CMD -- /usr/bin/emacsclient "$@";;
 esac
 
 HEREDOC
