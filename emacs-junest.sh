@@ -53,6 +53,11 @@ _enable_chaoticaur() {
 	printf "\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist" >> ./.junest/etc/pacman.conf
 }
 
+_enable_archlinuxcn() {
+	./.local/share/junest/bin/junest -- sudo pacman --noconfirm -U "https://repo.archlinuxcn.org/x86_64/$(curl -Ls https://repo.archlinuxcn.org/x86_64/ | tr '"' '\n' | grep "^archlinuxcn-keyring.*zst$" | tail -1)"
+	printf "\n[archlinuxcn]\n#SigLevel = Never\nServer = http://repo.archlinuxcn.org/\$arch" >> ./.junest/etc/pacman.conf
+}
+
 _custom_mirrorlist() {
 	COUNTRY=$(curl -i ipinfo.io 2>/dev/null | grep country | cut -c 15- | cut -c -2)
 	if [ -n "$GITHUB_REPOSITORY_OWNER" ] || ! curl --output /dev/null --silent --head --fail "https://archlinux.org/mirrorlist/?country=$COUNTRY" 1>/dev/null; then
@@ -80,6 +85,7 @@ _install_junest() {
 	echo " Apply patches to PacMan..."
 	#_enable_multilib
 	#_enable_chaoticaur
+	#_enable_archlinuxcn
 	_custom_mirrorlist
 	_bypass_signature_check_level
 
@@ -106,13 +112,14 @@ fi
 ./.local/share/junest/bin/junest -- yay -Syy
 #./.local/share/junest/bin/junest -- gpg --keyserver keyserver.ubuntu.com --recv-key C01E1CAD5EA2C4F0B8E3571504C367C218ADD4FF # UNCOMMENT IF YOU USE THE AUR
 if [ -n "$BASICSTUFF" ]; then
-	./.local/share/junest/bin/junest -- yay --noconfirm -S "$BASICSTUFF"
+	./.local/share/junest/bin/junest -- yay --noconfirm -S $BASICSTUFF
 fi
 if [ -n "$COMPILERS" ]; then
-	./.local/share/junest/bin/junest -- yay --noconfirm -S "$COMPILERS"
+	./.local/share/junest/bin/junest -- yay --noconfirm -S $COMPILERS
+	./.local/share/junest/bin/junest -- yay --noconfirm -S python # to force one Python version and prevent modules from being installed in different directories (e.g. "mesonbuild")
 fi
 if [ -n "$DEPENDENCES" ]; then
-	./.local/share/junest/bin/junest -- yay --noconfirm -S "$DEPENDENCES"
+	./.local/share/junest/bin/junest -- yay --noconfirm -S $DEPENDENCES
 fi
 if [ -n "$APP" ]; then
 	./.local/share/junest/bin/junest -- yay --noconfirm -S alsa-lib gtk3 xapp
@@ -529,9 +536,9 @@ _remove_more_bloatwares() {
 	rm -Rf ./"$APP".AppDir/.junest/usr/include # files related to the compiler
 	rm -Rf ./"$APP".AppDir/.junest/usr/share/man # AppImages are not ment to have man command
 	rm -Rf ./"$APP".AppDir/.junest/usr/lib/python*/__pycache__/* # if python is installed, removing this directory can save several megabytes
-	#rm -Rf ./"$APP".AppDir/.junest/usr/lib/libgallium*
-	#rm -Rf ./"$APP".AppDir/.junest/usr/lib/libgo.so*
-	#rm -Rf ./"$APP".AppDir/.junest/usr/lib/libLLVM* # included in the compilation phase, can sometimes be excluded for daily use
+	rm -Rf ./"$APP".AppDir/.junest/usr/lib/libgallium*
+	rm -Rf ./"$APP".AppDir/.junest/usr/lib/libgo.so*
+	rm -Rf ./"$APP".AppDir/.junest/usr/lib/libLLVM* # included in the compilation phase, can sometimes be excluded for daily use
 	rm -Rf ./"$APP".AppDir/.junest/var/* # remove all packages downloaded with the package manager
 }
 
@@ -546,6 +553,11 @@ _enable_mountpoints_for_the_inbuilt_bubblewrap() {
 	rm -f ./"$APP".AppDir/.junest/etc/localtime && touch ./"$APP".AppDir/.junest/etc/localtime
 	[ ! -f ./"$APP".AppDir/.junest/etc/asound.conf ] && touch ./"$APP".AppDir/.junest/etc/asound.conf
 }
+
+# Fix libcurl
+if test -f ./"$APP".AppDir/.junest/usr/lib/libcurl*; then
+	rm -f ./"$APP".AppDir/.junest/usr/lib/libcurl* && cp -r ./archlinux/.junest/usr/lib/libcurl* ./"$APP".AppDir/.junest/usr/lib/
+fi
 
 _remove_more_bloatwares
 find ./"$APP".AppDir/.junest/usr/lib ./"$APP".AppDir/.junest/usr/lib32 -type f -regex '.*\.a' -exec rm -f {} \; 2>/dev/null
