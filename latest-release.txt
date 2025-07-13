@@ -1,2 +1,2 @@
 https://github.com/ivan-hc/Emacs-appimage/releases/download/continuous/Emacs_30.1-5-archimage4.3-x86_64.AppImage
-Sat Jul 12 01:19:26 UTC 2025
+Sun Jul 13 01:24:49 UTC 2025
