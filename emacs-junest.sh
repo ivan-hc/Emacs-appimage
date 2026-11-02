@@ -16,7 +16,7 @@ LIBSAVED="crti.o crtn.o libc_nonshared.a crtbeginS.o crtendS.o libatomic.a libat
 # Some keywords and paths are already set. Remove them if you consider them necessary for the AppImage to function properly.
 ETC_REMOVED="makepkg.conf pacman"
 BIN_REMOVED="gcc"
-LIB_REMOVED="gcc libgallium libLLVM"
+LIB_REMOVED="libgallium libLLVM"
 PYTHON_REMOVED="__pycache__/"
 SHARE_REMOVED="gcc icons/AdwaitaLegacy icons/Adwaita/cursors/ terminfo libgo"
 
@@ -34,15 +34,11 @@ _post_installation_processes() {
 	cp -r archlinux/.junest/usr/share/applications/"$APP".desktop AppDir/
 	find base/usr/share/doc/* -not -iname "*$BIN*" -a -not -name "." -delete 2> /dev/null #REMOVE ALL DOCUMENTATION NOT RELATED TO THE APP
 	find base/usr/share/locale/*/*/* -not -iname "*$BIN*" -a -not -name "." -delete 2> /dev/null #REMOVE ALL ADDITIONAL LOCALE FILES
-	for d in ./archlinux/.junest/usr/lib/gcc/x86_64-pc-linux-gnu/*; do
-		if [ -d "$d" ]; then
-			for f in crtbeginS.o crtendS.o libatomic.a libatomic_asneeded.so libgcc.a libgcc_s.solibgcc_s_asneeded.so; do
-				if [ -f "$d/$f" ]; then
-					gcc_subdir_name=$(echo "$d" | sed 's:.*/::')
-					mkdir -p AppDir/.junest/usr/lib/gcc/x86_64-pc-linux-gnu/"$gcc_subdir_name"
-					cp -r "$d/$f" AppDir/.junest/usr/lib/gcc/x86_64-pc-linux-gnu/"$gcc_subdir_name"/
-				fi
-			done
+
+	cp -r ./archlinux/.junest/usr/lib/gcc AppDir/.junest/usr/lib/
+	for f in ./AppDir/.junest/usr/lib/gcc/x86_64-pc-linux-gnu/*/*; do
+		if ! echo "$f" | grep -q "crtbeginS\|crtendS\|libatomic\|libgcc"; then
+			rm -Rf "$f" && echo "Removing $f"
 		fi
 	done
 }
