@@ -2,7 +2,7 @@
 
 APP=emacs
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
-DEPENDENCES="binutils coreutils ecb emacs-apel emacs-muse emacs-php-mode emacs-python-mode emacs-slime flim semi wanderlust" #SYNTAX: "APP1 APP2 APP3 APP4...", LEAVE BLANK IF NO OTHER DEPENDENCIES ARE NEEDED
+DEPENDENCES="binutils coreutils ecb emacs-apel emacs-muse emacs-php-mode emacs-python-mode emacs-slime flim glibc semi wanderlust" #SYNTAX: "APP1 APP2 APP3 APP4...", LEAVE BLANK IF NO OTHER DEPENDENCIES ARE NEEDED
 #BASICSTUFF="binutils debugedit gzip"
 #COMPILERS="base-devel"
 
@@ -16,7 +16,7 @@ LIBSAVED="crti.o crtn.o libc_nonshared.a crtbeginS.o crtendS.o libatomic.a libat
 # Some keywords and paths are already set. Remove them if you consider them necessary for the AppImage to function properly.
 ETC_REMOVED="makepkg.conf pacman"
 BIN_REMOVED="gcc"
-LIB_REMOVED="libgallium libLLVM"
+LIB_REMOVED="gcc libgallium libLLVM"
 PYTHON_REMOVED="__pycache__/"
 SHARE_REMOVED="gcc icons/AdwaitaLegacy icons/Adwaita/cursors/ terminfo libgo"
 
@@ -25,7 +25,7 @@ SHARE_REMOVED="gcc icons/AdwaitaLegacy icons/Adwaita/cursors/ terminfo libgo"
 # Default mounted directories are /media, /mnt, /opt, /run/media, /usr/lib/locale, /usr/share/fonts, /usr/share/themes, /var, and Nvidia-related directories
 # Do not touch this if you are not sure.
 mountpoint_files=""
-mountpoint_dirs=""
+mountpoint_dirs="/usr/lib/gcc"
 
 # Post-installation processes (add whatever you want)
 _post_installation_processes() {
@@ -35,12 +35,13 @@ _post_installation_processes() {
 	find base/usr/share/doc/* -not -iname "*$BIN*" -a -not -name "." -delete 2> /dev/null #REMOVE ALL DOCUMENTATION NOT RELATED TO THE APP
 	find base/usr/share/locale/*/*/* -not -iname "*$BIN*" -a -not -name "." -delete 2> /dev/null #REMOVE ALL ADDITIONAL LOCALE FILES
 
-	cp -r ./archlinux/.junest/usr/lib/gcc AppDir/.junest/usr/lib/
-	for f in ./AppDir/.junest/usr/lib/gcc/x86_64-pc-linux-gnu/*/*; do
-		if ! echo "$f" | grep -q "crtbeginS\|crtendS\|libatomic\|libgcc"; then
-			rm -Rf "$f" && echo "Removing $f"
-		fi
-	done
+	# Include gcc files (remove gcc from LIB_REMOVED)
+	#cp -r ./archlinux/.junest/usr/lib/gcc AppDir/.junest/usr/lib/
+	#for f in ./AppDir/.junest/usr/lib/gcc/x86_64-pc-linux-gnu/*/*; do
+	#	if ! echo "$f" | grep -q "crtbeginS\|crtendS\|libatomic\|libgcc"; then
+	#		rm -Rf "$f" && echo "Removing $f"
+	#	fi
+	#done
 }
 
 ##########################################################################################################################################################
