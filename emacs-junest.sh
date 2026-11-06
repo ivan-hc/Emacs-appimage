@@ -25,7 +25,7 @@ SHARE_REMOVED="gcc icons/AdwaitaLegacy icons/Adwaita/cursors/ terminfo libgo"
 # Default mounted directories are /media, /mnt, /opt, /run/media, /usr/lib/locale, /usr/share/fonts, /usr/share/themes, /var, and Nvidia-related directories
 # Do not touch this if you are not sure.
 mountpoint_files=""
-mountpoint_dirs=""
+mountpoint_dirs="/usr/share/terminfo"
 
 # Post-installation processes (add whatever you want)
 _post_installation_processes() {
