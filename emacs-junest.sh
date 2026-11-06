@@ -30,6 +30,8 @@ mountpoint_dirs=""
 # Post-installation processes (add whatever you want)
 _post_installation_processes() {
 	printf "\n◆ User's processes: \n\n"
+	rm -f AppDir/.junest/usr/lib/libc.so
+	mkdir -p AppDir/.junest/usr/lib/gcc/x86_64-pc-linux-gnu
 	rm -f AppDir/*.desktop
 	cp -r archlinux/.junest/usr/share/applications/"$APP".desktop AppDir/
 	find base/usr/share/doc/* -not -iname "*$BIN*" -a -not -name "." -delete 2> /dev/null #REMOVE ALL DOCUMENTATION NOT RELATED TO THE APP
