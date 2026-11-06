@@ -2,14 +2,14 @@
 
 APP=emacs
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
-DEPENDENCES="binutils coreutils ecb emacs-apel emacs-muse emacs-php-mode emacs-python-mode emacs-slime flim glibc semi wanderlust" #SYNTAX: "APP1 APP2 APP3 APP4...", LEAVE BLANK IF NO OTHER DEPENDENCIES ARE NEEDED
+DEPENDENCES="binutils coreutils ecb emacs-apel emacs-muse emacs-php-mode emacs-python-mode emacs-slime flim semi wanderlust" #SYNTAX: "APP1 APP2 APP3 APP4...", LEAVE BLANK IF NO OTHER DEPENDENCIES ARE NEEDED
 #BASICSTUFF="binutils debugedit gzip"
 #COMPILERS="base-devel"
 
 # Set keywords to searchan include in names of directories and files in /usr/bin (BINSAVED), /usr/share (SHARESAVED) and /usr/lib (LIBSAVED)
 BINSAVED="SAVEBINSPLEASE"
 SHARESAVED="SAVESHAREPLEASE"
-LIBSAVED="crti.o crtn.o libc_nonshared.a crtbeginS.o crtendS.o libatomic.a libatomic_asneeded.so libgcc.a libgcc_s.so libgcc_s_asneeded.so"
+LIBSAVED="SAVELIBSPLEASE"
 
 # Set the items you want to manually REMOVE. Complete the path in /etc/, /usr/bin/, /usr/lib/, /usr/lib/python*/ and /usr/share/ respectively.
 # The "rm" command will take into account the listed object/path and add an asterisk at the end, completing the path to be removed.
@@ -25,7 +25,7 @@ SHARE_REMOVED="gcc icons/AdwaitaLegacy icons/Adwaita/cursors/ terminfo libgo"
 # Default mounted directories are /media, /mnt, /opt, /run/media, /usr/lib/locale, /usr/share/fonts, /usr/share/themes, /var, and Nvidia-related directories
 # Do not touch this if you are not sure.
 mountpoint_files=""
-mountpoint_dirs="/usr/lib/gcc"
+mountpoint_dirs=""
 
 # Post-installation processes (add whatever you want)
 _post_installation_processes() {
@@ -34,14 +34,6 @@ _post_installation_processes() {
 	cp -r archlinux/.junest/usr/share/applications/"$APP".desktop AppDir/
 	find base/usr/share/doc/* -not -iname "*$BIN*" -a -not -name "." -delete 2> /dev/null #REMOVE ALL DOCUMENTATION NOT RELATED TO THE APP
 	find base/usr/share/locale/*/*/* -not -iname "*$BIN*" -a -not -name "." -delete 2> /dev/null #REMOVE ALL ADDITIONAL LOCALE FILES
-
-	# Include gcc files (remove gcc from LIB_REMOVED)
-	#cp -r ./archlinux/.junest/usr/lib/gcc AppDir/.junest/usr/lib/
-	#for f in ./AppDir/.junest/usr/lib/gcc/x86_64-pc-linux-gnu/*/*; do
-	#	if ! echo "$f" | grep -q "crtbeginS\|crtendS\|libatomic\|libgcc"; then
-	#		rm -Rf "$f" && echo "Removing $f"
-	#	fi
-	#done
 }
 
 ##########################################################################################################################################################
